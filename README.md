@@ -2,3 +2,57 @@ git-version-proxy
 =================
 
 A HTTP Git proxy that only exposes certain versions.
+
+Setup
+-----
+
+Build and start up the proxy:
+
+    go intsall github.com/msiebuhr/git-version-proxy
+	rehash # required by some shells
+	git-version-proxy
+
+It starts up a webserver on `localhost:8080`, which will understand Github URLs on the form
+
+    http://localhost:8080/github.com/msiebuhr/@<commitish>/git-version-proxy
+
+For example, you can `go get` a version 0.1.0 of Etcd by doing:
+
+    go get 127.0.0.1:8080/github.com/coreos/@0.1.0/etcd
+
+(Currently, the `@version` can go pretty much anywhere in the URL. I'll have to
+test if it breaks too many things to put it at the very end.)
+
+Goals
+-----
+
+Make a demonstrator/experimental implementation of using VCS
+tagging/versioning/binding to get specific versions of go packages.
+
+My utopia-fantasy-goal would be for Go to support something on the form
+
+    import (
+	    "github.com/username/project" `v1.2.3`
+	)
+
+Simply having go put it somewhere sensible (I don't care terribly about the
+particulars on that). Versioning/branch/commitish is marked a la the tagged
+struct syntax used with JSON & friends.
+
+Personally, I would like it to understand [semver](http://semver.org/) (I find
+it works well for me in Node.js), but I'd be fine without.
+
+And hey, It doesn't break Go1.
+
+Limitations
+-----------
+
+ * Can't use `localhost`, because Go strongly believes hostnames should have
+   dots in them. `127.0.0.1` works.
+ * Only git-stuff. From github.
+ * The git parser isn't well tested (it will break from time to time).
+ * The syntax for `@commitish` is chosen because it was the first to come to
+   mind (after a brief affair with `__commitish__`, that ended when I found out
+   `@` was allowed in import paths.)
+ * Won't work on windows - for development purposes, it uses a non-standard
+   port. Ports are set with a `:`, which is illegal in paths in Windows.
