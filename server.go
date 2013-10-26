@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	//"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -17,57 +16,53 @@ func copyHeaders(from, to http.Header) {
 	}
 }
 
+// One of the path elements will start and end with @. If we strip that element
+// out, we will get a path + tag/whatever.
+// ex: github.com/msiebuhr/@master/foo.git
+//
+// TODO: We should probably have a generic parser that results in (VCS, host,
+// commitish)
+func splitPathAndCommitish(path string) (string, string) {
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	c := ""
+	p_arr := make([]string, 0, len(parts))
+
+	for _, part := range parts {
+		if strings.HasPrefix(part, "@") {
+			c = part
+		} else {
+			p_arr = append(p_arr, part)
+		}
+	}
+
+	return strings.Join(p_arr, "/"), strings.Trim(c, "@")
+}
+
 func main() {
-	http.HandleFunc("/github/", func(w http.ResponseWriter, r *http.Request) {
-		// Parse the path: /github/<username>/<commitish>/<project/subdir/...>
-		parts := strings.SplitN(r.URL.Path, "/", 5)
-		baseUrl := fmt.Sprintf("https://github.com/%s/%s", parts[2], parts[4])
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.URL.Path)
+		// Is it a go-get request? And why should I care?
+
+		// TODO: Check upstream exists!
+		w.WriteHeader(200)
+		w.Write([]byte("<html><head>\n"))
+		fmt.Fprintf(
+			w,
+			"<meta name=\"go-import\" content=\"127.0.0.1:8080%s git http://127.0.0.1:8080/_git%s\"></meta>\n",
+			r.URL.Path,
+			r.URL.Path,
+		)
+		w.Write([]byte("</head><body>foobar</body></html>"))
+	})
+
+	// Magic GIT imports
+	http.HandleFunc("/_git/github.com/", func(w http.ResponseWriter, r *http.Request) {
+		path, commitish := splitPathAndCommitish(strings.TrimPrefix(r.URL.Path, "/_git"))
+		baseUrl := fmt.Sprintf("https://%s", path)
 		fullUrl := baseUrl
 		if r.URL.RawQuery != "" {
 			fullUrl = fmt.Sprintf("%v?%v", baseUrl, r.URL.RawQuery)
 		}
-		commitish := parts[3]
-
-		// Is it for info/refs?
-		// TODO: Should parse the "Smart" reply and only send the relevant REFs
-		if strings.HasSuffix(parts[4], "info/refs") {
-			// TODO: If we get a commit SHA, use that as REF / master
-
-			// Fetch and parse the advanced info/refs from github and send a simple one down...
-			res, _ := http.Get(fullUrl)
-			//body, _ := ioutil.ReadAll(res.Body)
-			body, _ := readPktLine(res.Body)
-
-			// Go through the lines and filter out irelevant refs
-			newBody := []string{}
-			for _, line := range body {
-				if strings.HasPrefix(line, "#") || strings.HasSuffix(line, commitish) || len(line) == 0 || len(strings.Fields(line)) > 2 {
-					fmt.Println(commitish, line)
-					newBody = append(newBody, line)
-				}
-			}
-
-			// TODO: Look only for suffixes on the form heads/<commitish> and tags/<commitish>.
-
-			// TODO: We need to treat the line with <sha> HEAD<gitstuff>
-			// specially - namely, to seems we have to use whatever <sha> we
-			// need to represent as the HEAD.
-			//
-			// I suspect it does this instead of making a separate request for
-			// /HEAD on the repository
-
-			copyHeaders(res.Header, w.Header())
-			writePktLine(w, newBody)
-			return
-		}
-
-		/*
-			// Is it for HEAD?
-			if strings.HasSuffix(parts[4], "HEAD") {
-				fmt.Fprint(w, "ref: refs/heads/master\n");
-				return;
-			}
-		*/
 
 		fmt.Println(fullUrl, commitish)
 
@@ -77,21 +72,34 @@ func main() {
 		copyHeaders(r.Header, req.Header)
 		res, err := client.Do(req)
 		if err != nil {
-			fmt.Println(err)
+			//fmt.Println(err)
 			http.Error(w, fmt.Sprintf("Proxy error: %v", err), 500)
 			return
 		}
 
-		fmt.Println(res.Status, res.ContentLength)
+		// If if it is an info/refs thing, then we want to modify the body before it goes back
+		if strings.HasSuffix(path, "info/refs") {
+			body, _ := parseGitUploadPack(res.Body)
 
-		// Send back response headers
-		copyHeaders(res.Header, w.Header())
-		w.WriteHeader(res.StatusCode)
+			err := body.SetMaster(commitish)
 
-		// Copy over response
-		io.Copy(w, res.Body)
+			if (err != nil) {
+				fmt.Println("ERROR:", err);
+				w.WriteHeader(404);
+			}
 
-		//fmt.Fprintf(w, "Hello %q", html.EscapeString(r.URL.Path))
+			// Send back response headers
+			copyHeaders(res.Header, w.Header())
+			w.WriteHeader(res.StatusCode)
+
+			w.Write([]byte(body.String()))
+			//w.Close()
+		} else {
+			// Copy over response
+			copyHeaders(res.Header, w.Header())
+			w.WriteHeader(res.StatusCode)
+			io.Copy(w, res.Body)
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
