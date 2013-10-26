@@ -41,13 +41,13 @@ func readPktLine(r io.ReadCloser) ([]string, error) {
 	return out, nil
 }
 
-func writePktLine(w io.Writer, d []string) error {
+func writePktLines(w io.Writer, d []string) error {
 	for _, line := range d {
 		if len(line) == 0 {
 			fmt.Fprintf(w, "0000")
 			continue
 		}
-		fmt.Printf("Encoding: %04x%s\n", len(line)+4, line)
+		//fmt.Printf("Encoding: %04x%s\n", len(line)+4, line)
 		fmt.Fprintf(w, "%04x%s", len(line)+4, line)
 	}
 	return nil
