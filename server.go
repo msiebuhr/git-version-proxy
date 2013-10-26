@@ -83,9 +83,9 @@ func main() {
 
 			err := body.SetMaster(commitish)
 
-			if (err != nil) {
-				fmt.Println("ERROR:", err);
-				w.WriteHeader(404);
+			if err != nil {
+				fmt.Println("ERROR:", err)
+				w.WriteHeader(404)
 			}
 
 			// Send back response headers

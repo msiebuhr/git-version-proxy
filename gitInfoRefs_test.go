@@ -39,11 +39,10 @@ func TestGitInfoRefs(t *testing.T) {
 		)
 	}
 	/*
-	if gup.String() != "001e# service=git-upload-pack\n0000" {
-		t.Errorf("Didn't get the right output.")
-	}
+		if gup.String() != "001e# service=git-upload-pack\n0000" {
+			t.Errorf("Didn't get the right output.")
+		}
 	*/
-
 
 	if gup.capabilities != "multi_ack thin-pack side-band side-band-64k ofs-delta shallow no-progress include-tag multi_ack_detailed no-done agent=git/1.8.4" {
 		t.Errorf(

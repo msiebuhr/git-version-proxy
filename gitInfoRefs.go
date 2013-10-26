@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"io"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -41,7 +41,7 @@ func parseGitUploadPack(r io.ReadCloser) (*GitUploadPack, error) {
 		if len(parts) == 2 && len(parts[0]) == 40 {
 			p.refs[parts[1]] = parts[0]
 		} else {
-			fmt.Printf("ARGH! Could not figure out '%v'.\n", elem);
+			fmt.Printf("ARGH! Could not figure out '%v'.\n", elem)
 		}
 	}
 
@@ -49,19 +49,19 @@ func parseGitUploadPack(r io.ReadCloser) (*GitUploadPack, error) {
 }
 
 func writePktLine(line string) string {
-	return fmt.Sprintf("%04x%s", len(line) + 4, line)
+	return fmt.Sprintf("%04x%s", len(line)+4, line)
 }
 
 func (p *GitUploadPack) String() string {
 	out := []string{
 		"001e# service=git-upload-pack\n0000",
-	writePktLine(fmt.Sprintf("%s HEAD\000%s\n", p.refs["HEAD"], p.capabilities)),
+		writePktLine(fmt.Sprintf("%s HEAD\000%s\n", p.refs["HEAD"], p.capabilities)),
 	}
 
 	// Write everything else
 	for ref, commit := range p.refs {
 		if ref != "HEAD" {
-			out =append(out, writePktLine(fmt.Sprintf("%s %s\n", commit, ref)))
+			out = append(out, writePktLine(fmt.Sprintf("%s %s\n", commit, ref)))
 		}
 	}
 
