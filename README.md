@@ -12,9 +12,9 @@ Build and start up the proxy:
 	rehash # required by some shells
 	git-version-proxy
 
-It starts up a webserver on `localhost:8080`, which will understand Github URLs on the form
+It starts up a webserver on `127.0.0.1:8080`, which will understand Github URLs on the form
 
-    http://localhost:8080/github.com/msiebuhr/@<commitish>/git-version-proxy
+    http://127.0.0.1:8080/github.com/msiebuhr/@<commitish>/git-version-proxy
 
 For example, you can `go get` a version 0.1.0 of Etcd by doing:
 
@@ -56,3 +56,5 @@ Limitations
    `@` was allowed in import paths.)
  * Won't work on windows - for development purposes, it uses a non-standard
    port. Ports are set with a `:`, which is illegal in paths in Windows.
+ * Has a lot of corner-cases with subtle breakage (it's pushing the VCS/go get
+   implementation quite a bit).
