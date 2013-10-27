@@ -30,18 +30,19 @@ Goals
 Make a demonstrator/experimental implementation of using VCS
 tagging/versioning/binding to get specific versions of go packages.
 
-My utopia-fantasy-goal would be for Go to support something on the form
+My utopia-fantasy-goal would be for Go to support something along these lines
 
-    import (
-	    "github.com/username/project" `v1.2.3`
-	)
+	import "github.com/username/project" `v1.2.3`
+	import "github.com/username/project" @ "v1.2.3"
+	import "github.com/username/project@v1.2.3"
 
-Simply having go put it somewhere sensible (I don't care terribly about the
-particulars on that). Versioning/branch/commitish is marked a la the tagged
-struct syntax used with JSON & friends.
+Simply having `go get` put it somewhere sensible (I don't care terribly about
+the particulars on how it is serialized to disk). Versioning/branch/commitish
+could either be embedded in the import string or somewhere nearby, as with
+struct field tags.
 
 Personally, I would like it to understand [semver](http://semver.org/) (I find
-it works well for me in Node.js), but I'd be fine without.
+it works well in Node.js), but I might be fine without.
 
 And hey, It doesn't break Go1.
 
