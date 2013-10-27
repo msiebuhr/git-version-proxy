@@ -28,8 +28,13 @@ func splitPathAndCommitish(path string) (string, string) {
 	p_arr := make([]string, 0, len(parts))
 
 	for _, part := range parts {
+		// .../@commitish/...
 		if strings.HasPrefix(part, "@") {
 			c = part
+		} else if strings.Contains(part, "@") {
+			subParts := strings.SplitN(part, "@", 2)
+			c = subParts[1]
+			p_arr = append(p_arr, subParts[0])
 		} else {
 			p_arr = append(p_arr, part)
 		}
