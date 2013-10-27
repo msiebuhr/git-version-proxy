@@ -28,7 +28,7 @@ func parseGitUploadPack(r io.ReadCloser) (*GitUploadPack, error) {
 	// First pack should be "001e# service=git-upload-pack"
 	// Second pack is empty...
 	// Last pack is empty too...
-	refs := res[2:]
+	refs := res[2 : len(res)-1]
 	// Thrid shoud have a standard "SHA ref\0capabilities"
 	caps := strings.SplitN(refs[0], "\000", 2)
 	if len(caps) == 2 {
@@ -41,7 +41,7 @@ func parseGitUploadPack(r io.ReadCloser) (*GitUploadPack, error) {
 		if len(parts) == 2 && len(parts[0]) == 40 {
 			p.refs[parts[1]] = parts[0]
 		} else {
-			fmt.Printf("ARGH! Could not figure out '%v'.\n", elem)
+			return p, errors.New(fmt.Sprintf("InfoRefsParser: Unexpected input '%v'.", elem))
 		}
 	}
 
