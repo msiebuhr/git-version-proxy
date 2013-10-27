@@ -86,6 +86,7 @@ func main() {
 			if err != nil {
 				fmt.Println("ERROR:", err)
 				w.WriteHeader(404)
+				return
 			}
 
 			// Send back response headers
