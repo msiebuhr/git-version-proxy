@@ -1,10 +1,22 @@
-git-go-proxy: *.go
+.PHONY: all test fmt benchmark git-add-hook clean
+
+all: test fmt git-version-proxy
+
+git-version-proxy: *.go
 	go build .
 
-.PHONY: test
 test:
-	./test.sh
+	go test ./...
 
-.PHONY: clean
+fmt:
+	go fmt ./...
+
+benchmark:
+	go test ./... -bench=".*"
+
+git-pre-commit-hook:
+	curl -s 'http://tip.golang.org/misc/git/pre-commit?m=text' > .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit
+
 clean:
-	rm git-version-proxy
+	go clean .
