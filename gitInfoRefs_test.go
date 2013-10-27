@@ -80,7 +80,7 @@ func TestGitInfoRefs(t *testing.T) {
 	}
 
 	// Set commit at someting bogus blows up
-	err = gup.SetHead("does-not-exist")
+	err = gup.SetMaster("does-not-exist")
 	if err == nil {
 		t.Errorf("Expected SetHead(does-not-exist) to fail. It didn't.")
 	}
