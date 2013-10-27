@@ -15,10 +15,11 @@ Build and start up the proxy:
 It starts up a webserver on `127.0.0.1:8080`, which will understand Github URLs on the form
 
     http://127.0.0.1:8080/github.com/msiebuhr/@<commitish>/git-version-proxy
+    http://127.0.0.1:8080/github.com/msiebuhr/git-version-proxy@<commitish>
 
 For example, you can `go get` a version 0.1.0 of Etcd by doing:
 
-    go get 127.0.0.1:8080/github.com/coreos/@0.1.0/etcd
+    go get 127.0.0.1:8080/github.com/coreos/etcd@v0.1.0
 
 (Currently, the `@version` can go pretty much anywhere in the URL. I'll have to
 test if it breaks too many things to put it at the very end.)
