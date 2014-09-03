@@ -8,7 +8,7 @@ Setup
 
 Build and start up the proxy:
 
-    go intsall github.com/msiebuhr/git-version-proxy
+    go install github.com/msiebuhr/git-version-proxy
 	rehash # required by some shells
 	git-version-proxy
 
