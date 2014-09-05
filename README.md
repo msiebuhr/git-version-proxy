@@ -1,6 +1,8 @@
 git-version-proxy
 =================
 
+**DEPRECATED**: See http://gopkg.in/
+
 A HTTP Git proxy that only exposes certain versions.
 
 Setup
